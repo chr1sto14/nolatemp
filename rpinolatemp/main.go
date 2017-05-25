@@ -11,6 +11,5 @@ func main() {
 	temp.GetTemp()
 
 	// TODO
-	// 1. get outside weather
-	// 2. send data (ts, inside, outside) to webnolatemp
+	// 1. send data (ts, inside) to webnolatemp
 }

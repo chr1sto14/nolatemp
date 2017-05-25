@@ -2,22 +2,30 @@ package main
 
 import (
 	"fmt"
+	"github.com/chr1sto14/nolatemp/temp"
 	"net/http"
 )
 
 func tempHandler(w http.ResponseWriter, r *http.Request) {
+	outsideTemp := temp.GetNolaTemp()
+	fmt.Printf("The temperature in NOLA is %dF.", outsideTemp)
+}
+
+func nolaHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Temperature coming right up!")
 }
 
 func main() {
-	http.HandleFunc("/temp", handler)
+	http.HandleFunc("/temp", tempHandler)
+	http.HandleFunc("/nola", nolaHandler)
 	http.ListenAndServe(":8080", nil)
 
 	// TODO
 	// 1. receieve data from rpi
-	// 2. store data (ts, inside, outside) to cockroachdb
-	// 3. recieve commands from hipchat
-	// 4. gather data from db based upon timeline
-	// 5. format a plot ( inside, outside vs. time )
-	// 6. format response to nola hipchat
+	// 2. get outside data from weather api
+	// 3. store data (ts, inside, outside) to cockroachdb
+	// 4. recieve commands from hipchat
+	// 5. gather data from db based upon timeline
+	// 6. format a plot ( inside, outside vs. time )
+	// 7. format response to nola hipchat
 }
