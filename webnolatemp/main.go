@@ -22,7 +22,6 @@ func main() {
 
 	// TODO
 	// 1. receieve data from rpi
-	// 2. get outside data from weather api
 	// 3. store data (ts, inside, outside) to cockroachdb
 	// 4. recieve commands from hipchat
 	// 5. gather data from db based upon timeline

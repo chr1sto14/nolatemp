@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os/user"
-	"strconv"
 )
 
 const absoluteZeroF = 459.67
@@ -22,35 +21,29 @@ type WeatherData struct {
 	Temp float64 `json:"temperature"`
 }
 
-func getCurrentWeather() (float64, error) {
+func getApiKey() (string, error) {
 	// TODO err check here
 	user, _ := user.Current()
 
 	// TODO err check here
 	datab, _ := ioutil.ReadFile(user.HomeDir + "/weatherapi.key")
-	data := bytes.TrimSpace(datab)
-	// TODO fmt.Sprintf
-	url := fmt.Sprintf(nolaUrlRoot, string(data))
 
-	log.Printf("url %s", url)
+	return string(bytes.TrimSpace(datab)), nil
+}
+
+func getCurrentTemp(key string) (float64, error) {
 	ds := new(DarkSkyApi)
-	err := net.GetJson(url, ds)
+	err := net.GetJson(fmt.Sprintf(nolaUrlRoot, key), ds)
 	if err != nil {
 		log.Printf("Error %s", err)
 	}
 	return ds.Currently.Temp, nil
 }
 
-func kStrToF(valStr string) (float64, error) {
-	// TODO err check here
-	val, _ := strconv.ParseFloat(valStr, 64)
-	return float64((val * 9 / 5) - absoluteZeroF), nil
-}
-
+// TODO err check here
 func GetNolaTemp() float64 {
+	key, _ := getApiKey()
 	// TODO err check here
-	temp, _ := getCurrentWeather()
-	// TODO err check here
-	// temp, _ := kStrToF(tempStr)
+	temp, _ := getCurrentTemp(key)
 	return temp
 }
