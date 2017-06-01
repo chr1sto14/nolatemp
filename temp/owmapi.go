@@ -1,44 +1,42 @@
 package temp
 
 import (
-	"encoding/json"
+	"fmt"
+	"github.com/chr1sto14/nolatemp/net"
 	"io/ioutil"
-	"net/http"
+	"log"
+	"os/user"
 	"strconv"
 )
 
 const absoluteZeroF = 459.67
 
-var nolaUrlRoot string = "https://api.openweathermap.org/data/2.5/weather?zip=70112,us&APPID="
+var nolaUrlRoot string = "http://api.openweathermap.org/data/2.5/weather?id=4335045&APPID="
 
-func parseWeather(wInfo []byte) (tempStr string, err error) {
-	// TODO err check here
-	var blob map[string]interface{}
-	err = json.Unmarshal(wInfo, &blob)
+type OwmApi struct {
+	Main WeatherData `json:"main"`
+}
 
-	// TODO ok check here
-	mainBlob, _ := blob["main"].(map[string]interface{})
-
-	// TODO ok check here
-	tempStr, _ = mainBlob["temp"].(string)
-	return
+type WeatherData struct {
+	Temp string `json:"temp"`
 }
 
 func getCurrentWeather() (string, error) {
 	// TODO err check here
-	data, _ := ioutil.ReadFile("~/weatherapi.key")
+	user, _ := user.Current()
+
+	// TODO err check here
+	data, _ := ioutil.ReadFile(user.HomeDir + "/weatherapi.key")
+	// TODO fmt.Sprintf
 	url := nolaUrlRoot + string(data)
 
-	// TODO err check here
-	resp, _ := http.Get(url)
-	defer resp.Body.Close()
-	// TODO err check here
-	wInfo, _ := ioutil.ReadAll(resp.Body)
-
-	// TODO err check here
-	tempStr, _ := parseWeather(wInfo)
-
-	return tempStr, nil
+	owmapi := new(OwmApi)
+	err := net.GetJson(url, owmapi)
+	if err != nil {
+		log.Printf("Error %s", err)
+	}
+	fmt.Println("here " + owmapi.Main.Temp)
+	return owmapi.Main.Temp, nil
 }
 
 func kStrToF(valStr string) (float64, error) {

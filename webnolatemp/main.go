@@ -7,12 +7,12 @@ import (
 )
 
 func tempHandler(w http.ResponseWriter, r *http.Request) {
-	outsideTemp := temp.GetNolaTemp()
-	fmt.Printf("The temperature in NOLA is %dF.", outsideTemp)
+	fmt.Fprintf(w, "Temperature coming right up!")
 }
 
 func nolaHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Temperature coming right up!")
+	outsideTemp := temp.GetNolaTemp()
+	fmt.Printf("The temperature in NOLA is %dF.", outsideTemp)
 }
 
 func main() {

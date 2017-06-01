@@ -8,7 +8,9 @@ import (
 	"strings"
 )
 
-var deviceFile string = getFile()
+var deviceFile string = "1000"
+
+// getFile()
 
 func getFile() string {
 	baseDir := "/sys/bus/w1/devices/"
