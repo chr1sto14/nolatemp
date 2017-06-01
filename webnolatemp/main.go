@@ -12,7 +12,7 @@ func tempHandler(w http.ResponseWriter, r *http.Request) {
 
 func nolaHandler(w http.ResponseWriter, r *http.Request) {
 	outsideTemp := temp.GetNolaTemp()
-	fmt.Printf("The temperature in NOLA is %dF.", outsideTemp)
+	fmt.Printf("The temperature in NOLA is %g F.", outsideTemp)
 }
 
 func main() {

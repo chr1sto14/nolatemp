@@ -1,6 +1,7 @@
 package temp
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/chr1sto14/nolatemp/net"
 	"io/ioutil"
@@ -11,32 +12,33 @@ import (
 
 const absoluteZeroF = 459.67
 
-var nolaUrlRoot string = "http://api.openweathermap.org/data/2.5/weather?id=4335045&APPID="
+var nolaUrlRoot string = "https://api.darksky.net/forecast/%s/29.953,-90.071"
 
-type OwmApi struct {
-	Main WeatherData `json:"main"`
+type DarkSkyApi struct {
+	Currently WeatherData `json:"currently"`
 }
 
 type WeatherData struct {
-	Temp string `json:"temp"`
+	Temp float64 `json:"temperature"`
 }
 
-func getCurrentWeather() (string, error) {
+func getCurrentWeather() (float64, error) {
 	// TODO err check here
 	user, _ := user.Current()
 
 	// TODO err check here
-	data, _ := ioutil.ReadFile(user.HomeDir + "/weatherapi.key")
+	datab, _ := ioutil.ReadFile(user.HomeDir + "/weatherapi.key")
+	data := bytes.TrimSpace(datab)
 	// TODO fmt.Sprintf
-	url := nolaUrlRoot + string(data)
+	url := fmt.Sprintf(nolaUrlRoot, string(data))
 
-	owmapi := new(OwmApi)
-	err := net.GetJson(url, owmapi)
+	log.Printf("url %s", url)
+	ds := new(DarkSkyApi)
+	err := net.GetJson(url, ds)
 	if err != nil {
 		log.Printf("Error %s", err)
 	}
-	fmt.Println("here " + owmapi.Main.Temp)
-	return owmapi.Main.Temp, nil
+	return ds.Currently.Temp, nil
 }
 
 func kStrToF(valStr string) (float64, error) {
@@ -47,8 +49,8 @@ func kStrToF(valStr string) (float64, error) {
 
 func GetNolaTemp() float64 {
 	// TODO err check here
-	tempStr, _ := getCurrentWeather()
+	temp, _ := getCurrentWeather()
 	// TODO err check here
-	temp, _ := kStrToF(tempStr)
+	// temp, _ := kStrToF(tempStr)
 	return temp
 }
