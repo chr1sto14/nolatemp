@@ -2,18 +2,23 @@ package net
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"time"
 )
 
 var myClient = &http.Client{Timeout: 20 * time.Second}
 
+func ParseJson(r io.Reader, target interface{}) error {
+	return json.NewDecoder(r).Decode(target)
+}
+
 func GetJson(url string, target interface{}) error {
-	r, err := myClient.Get(url)
+	resp, err := myClient.Get(url)
 	if err != nil {
 		return err
 	}
-	defer r.Body.Close()
+	defer resp.Body.Close()
 
-	return json.NewDecoder(r.Body).Decode(target)
+	return ParseJson(resp.Body, target)
 }

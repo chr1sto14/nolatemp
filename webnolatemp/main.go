@@ -2,8 +2,11 @@ package main
 
 import (
 	"fmt"
+	"github.com/chr1sto14/nolatemp/net"
 	"github.com/chr1sto14/nolatemp/temp"
+	"log"
 	"net/http"
+	"time"
 )
 
 func tempHandler(w http.ResponseWriter, r *http.Request) {
@@ -11,8 +14,27 @@ func tempHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func nolaHandler(w http.ResponseWriter, r *http.Request) {
-	outsideTemp := temp.GetNolaTemp()
-	fmt.Printf("The temperature in NOLA is %g F.", outsideTemp)
+	// parse json
+	var tempJson temp.TempJson
+	err := net.ParseJson(r.Body, &tempJson)
+	if err != nil {
+		// TODO  just print error
+		panic(err)
+	}
+	defer r.Body.Close()
+	log.Printf("The response %+v", tempJson)
+
+	// prepare ts, inTemp, outTemp
+	var ts time.Time
+	// TODO err
+	err = ts.UnmarshalJSON(tempJson.Ts)
+	inTemp := tempJson.Temp
+	outTemp := temp.GetNolaTemp()
+	log.Printf("The ts %v", ts)
+	log.Printf("The inTemp %v", inTemp)
+	log.Printf("The outTemp %v", outTemp)
+
+	// cockroach db
 }
 
 func main() {
@@ -21,7 +43,6 @@ func main() {
 	http.ListenAndServe(":8080", nil)
 
 	// TODO
-	// 1. receieve data from rpi
 	// 3. store data (ts, inside, outside) to cockroachdb
 	// 4. recieve commands from hipchat
 	// 5. gather data from db based upon timeline

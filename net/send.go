@@ -7,6 +7,7 @@ import (
 )
 
 func SendJson(url string, pkg interface{}) error {
+	// TODO json Encoder
 	buf, _ := json.Marshal(pkg)
 	r, err := http.Post(url, "application/json", bytes.NewReader(buf))
 	if err != nil {

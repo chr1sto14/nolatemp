@@ -1,17 +1,25 @@
 package main
 
 import (
-	//"github.com/chr1sto14/nolatemp/temp"
+	"github.com/chr1sto14/nolatemp/temp"
 	"log"
+	"time"
 )
 
 func main() {
 	log.SetFlags(log.Ldate | log.Ltime | log.LUTC) // only show UTC time
 
-	// temp.GetTemp()
-	temp := float64(100)
+	// get timestamp
+	now, _ := time.Now().MarshalJSON()
 
-	SendTemp(temp)
+	// read temperature from rpi
+	// temp.GetTemp()
+	tempVal := float64(100)
+
+	err := temp.SendTemp(now, tempVal)
+	if err != nil {
+		panic(err)
+	}
 
 	// TODO
 	// 1. send data (ts, inside) to webnolatemp
