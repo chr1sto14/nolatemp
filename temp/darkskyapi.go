@@ -23,10 +23,10 @@ type WeatherData struct {
 
 func getApiKey() (string, error) {
 	// TODO err check here
-	user, _ := user.Current()
+	usr, _ := user.Current()
 
 	// TODO err check here
-	datab, _ := ioutil.ReadFile(user.HomeDir + "/weatherapi.key")
+	datab, _ := ioutil.ReadFile(usr.HomeDir + "/weatherapi.key")
 
 	return string(bytes.TrimSpace(datab)), nil
 }

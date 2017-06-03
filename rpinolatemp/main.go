@@ -20,7 +20,4 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	// TODO
-	// 1. send data (ts, inside) to webnolatemp
 }

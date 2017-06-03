@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/chr1sto14/nolatemp/db"
 	"github.com/chr1sto14/nolatemp/net"
 	"github.com/chr1sto14/nolatemp/temp"
 	"log"
@@ -35,15 +36,17 @@ func nolaHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("The outTemp %v", outTemp)
 
 	// cockroach db
+	err = db.InsertTsInOut(ts, inTemp, outTemp)
 }
 
 func main() {
 	http.HandleFunc("/temp", tempHandler)
 	http.HandleFunc("/nola", nolaHandler)
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":8888", nil)
 
 	// TODO
-	// 3. store data (ts, inside, outside) to cockroachdb
+	// 3. send success back from nolaHandler
+	// 3. b) send failed back if not proper json complete
 	// 4. recieve commands from hipchat
 	// 5. gather data from db based upon timeline
 	// 6. format a plot ( inside, outside vs. time )

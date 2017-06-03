@@ -5,7 +5,7 @@ import (
 )
 
 // TODO make this a cmd line arg?
-var webnolatempurl string = "http://localhost:8080/nola"
+var webnolatempurl string = "http://localhost:8888/nola"
 
 type TempJson struct {
 	Ts   []byte  `json:"ts"`
