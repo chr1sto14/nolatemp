@@ -7,7 +7,6 @@ import (
 	"github.com/chr1sto14/nolatemp/temp"
 	"log"
 	"net/http"
-	"time"
 )
 
 func tempHandler(w http.ResponseWriter, r *http.Request) {
@@ -16,20 +15,18 @@ func tempHandler(w http.ResponseWriter, r *http.Request) {
 
 func nolaHandler(w http.ResponseWriter, r *http.Request) {
 	// parse json
-	var tempJson temp.TempJson
-	err := net.ParseJson(r.Body, &tempJson)
+	// should just return ts and inTemp
+	ts, inTemp, err := temp.ParseTemp(r.Body)
 	if err != nil {
-		// TODO  just print error
-		panic(err)
+		net.Bad(w)
+		defer r.Body.Close()
+		log.Printf("Error: %v", err)
+		return
 	}
 	defer r.Body.Close()
-	log.Printf("The response %+v", tempJson)
 
 	// prepare ts, inTemp, outTemp
-	var ts time.Time
 	// TODO err
-	err = ts.UnmarshalJSON(tempJson.Ts)
-	inTemp := tempJson.Temp
 	outTemp := temp.GetNolaTemp()
 	log.Printf("The ts %v", ts)
 	log.Printf("The inTemp %v", inTemp)
@@ -40,6 +37,7 @@ func nolaHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	log.SetFlags(log.Ldate | log.Ltime | log.LUTC) // only show UTC time
 	http.HandleFunc("/temp", tempHandler)
 	http.HandleFunc("/nola", nolaHandler)
 	http.ListenAndServe(":8888", nil)

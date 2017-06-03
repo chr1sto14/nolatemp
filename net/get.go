@@ -9,8 +9,8 @@ import (
 
 var myClient = &http.Client{Timeout: 20 * time.Second}
 
-func ParseJson(r io.Reader, target interface{}) error {
-	return json.NewDecoder(r).Decode(target)
+func ParseJson(body io.Reader, target interface{}) error {
+	return json.NewDecoder(body).Decode(target)
 }
 
 func GetJson(url string, target interface{}) error {
