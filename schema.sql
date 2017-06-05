@@ -6,7 +6,7 @@ CREATE TABLE xxx.temp (
     outtemp DECIMAL
 );
 
-CREATE TABLE xxx.temp (
+CREATE TABLE xxx.images (
     id SERIAL PRIMARY KEY,
     img BYTES
 );

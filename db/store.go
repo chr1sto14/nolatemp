@@ -15,3 +15,18 @@ func InsertTsInOut(ts time.Time, inTemp float64, outTemp float64) error {
 	)
 	return err
 }
+
+func InsertImg(img []byte) (id int64, err error) {
+	res, err := Db.Exec(
+		"INSERT INTO nolatemp.images img VALUES $1",
+		img)
+	if err != nil {
+		return
+	}
+
+	id, err = res.LastInsertId()
+	if err != nil {
+		return
+	}
+	return
+}

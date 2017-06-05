@@ -2,8 +2,11 @@ package temp
 
 import (
 	"errors"
-	//"github.com/chr1sto14/nolatemp/db"
+	"github.com/chr1sto14/nolatemp/db"
+	"github.com/chr1sto14/nolatemp/hipchat"
+	"github.com/chr1sto14/nolatemp/tempplot"
 	"log"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -62,19 +65,25 @@ func tempTime(t string) (rv interface{}, err error) {
 	// TODO get data from db
 	cutoff := now.Add(time.Duration(-hour) * time.Hour)
 	log.Printf("time: %v", cutoff)
-	// data := db.Query
+	tss, intemps, outtemps, err := db.QueryTemp(cutoff)
+	if err != nil {
+		return
+	}
 
 	// TODO hand it off to a plotting package
-	// img := tempplot.MakePlot(data)
+	img, err := tempplot.MakePlot(tss, intemps, outtemps)
+	if err != nil {
+		return
+	}
 
 	// TODO store plot in db
-	// id := db.InsertImg(img)
-
-	// TODO format img url
-	// imgurl := myweb/img/ + id
+	id, err := db.InsertImg(img.Bytes())
+	if err != nil {
+		return
+	}
 
 	// TODO format hipchat message
-	// rv := hipchat.MsgUrl(imgurl)
+	rv = hipchat.MsgImgUrl(strconv.FormatInt(id, 10))
 	return
 }
 
