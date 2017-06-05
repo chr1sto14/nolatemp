@@ -8,7 +8,7 @@ import (
 
 func InsertTsInOut(ts time.Time, inTemp float64, outTemp float64) error {
 	_, err := Db.Exec(
-		"INSERT INTO nolatemp.temperature (ts, intemp, outtemp) VALUES ($1, $2, $3)",
+		"INSERT INTO nolatemp.temp (ts, intemp, outtemp) VALUES ($1, $2, $3)",
 		ts,
 		inTemp,
 		outTemp,

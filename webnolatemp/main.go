@@ -3,23 +3,52 @@ package main
 import (
 	"fmt"
 	"github.com/chr1sto14/nolatemp/db"
+	"github.com/chr1sto14/nolatemp/hipchat"
 	"github.com/chr1sto14/nolatemp/net"
 	"github.com/chr1sto14/nolatemp/temp"
 	"log"
 	"net/http"
+	"path"
 )
 
-func tempHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Temperature coming right up!")
+func cmdHandler(w http.ResponseWriter, r *http.Request) {
+	cmdJson, err := hipchat.ParseCmd(r.Body)
+	if err != nil {
+		net.Bad(w) // TODO following example http wiki example
+		log.Printf("Error: %v", err)
+		return
+	}
+
+	timeType, help, err := temp.ResolveCmd(cmdJson.Item.Message)
+	if err != nil {
+		net.Bad(w)
+		log.Printf("Error: %v", err)
+		return
+	} else if help {
+		net.Json(w, hipchat.Help())
+		return
+	}
+
+	val, err := temp.DoCmd(timeType)
+	if err != nil {
+		net.Bad(w)
+		log.Printf("Error: %v", err)
+		return
+	}
+	net.Json(w, val)
+	return
+}
+
+func imgHandler(w http.ResponseWriter, r *http.Request) {
+	id := path.Base(r.URL.Path)
+	fmt.Fprintf(w, "img coming right up for %s!", id)
 }
 
 func nolaHandler(w http.ResponseWriter, r *http.Request) {
-	// parse json
-	// should just return ts and inTemp
+	// parse and return ts and inTemp
 	ts, inTemp, err := temp.ParseTemp(r.Body)
 	if err != nil {
 		net.Bad(w)
-		defer r.Body.Close()
 		log.Printf("Error: %v", err)
 		return
 	}
@@ -34,17 +63,25 @@ func nolaHandler(w http.ResponseWriter, r *http.Request) {
 
 	// cockroach db
 	err = db.InsertTsInOut(ts, inTemp, outTemp)
+	if err != nil {
+		net.Bad(w)
+		log.Printf("Error: %v", err)
+		return
+	}
+	net.Good(w)
 }
 
 func main() {
 	log.SetFlags(log.Ldate | log.Ltime | log.LUTC) // only show UTC time
-	http.HandleFunc("/temp", tempHandler)
+	http.HandleFunc("/temp", cmdHandler)
+	http.HandleFunc("/img", imgHandler)
 	http.HandleFunc("/nola", nolaHandler)
 	http.ListenAndServe(":8888", nil)
 
 	// TODO
-	// 3. send success back from nolaHandler
-	// 3. b) send failed back if not proper json complete
+	// 1. receive cmds from hipchat
+	// 2. get relevant data from db
+	// 3. store image to db
 	// 4. recieve commands from hipchat
 	// 5. gather data from db based upon timeline
 	// 6. format a plot ( inside, outside vs. time )
