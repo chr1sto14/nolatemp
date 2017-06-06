@@ -25,12 +25,13 @@ func MakePlot(tss []time.Time, intemps []float64, outtemps []float64) (img bytes
 		return
 	}
 
-	xticks := plot.TimeTicks{Format: "2006-01\n15:04"}
+	xticks := plot.TimeTicks{Format: "01-02\n15:04"}
 
 	p.Title.Text = "NOLA Temp"
 	p.X.Label.Text = "Time"
 	p.X.Tick.Marker = xticks
 	p.Y.Label.Text = "Temperature"
+	p.Y.Min = 0
 
 	err = plotutil.AddLinePoints(p,
 		"Inside", makePoints(tss, intemps),

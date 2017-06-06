@@ -2,8 +2,6 @@ package db
 
 import (
 	"time"
-
-	_ "github.com/lib/pq"
 )
 
 func InsertTsInOut(ts time.Time, inTemp float64, outTemp float64) error {
@@ -17,16 +15,9 @@ func InsertTsInOut(ts time.Time, inTemp float64, outTemp float64) error {
 }
 
 func InsertImg(img []byte) (id int64, err error) {
-	res, err := Db.Exec(
-		"INSERT INTO nolatemp.images img VALUES $1",
-		img)
-	if err != nil {
-		return
-	}
-
-	id, err = res.LastInsertId()
-	if err != nil {
-		return
-	}
+	err = Db.QueryRow(
+		"INSERT INTO nolatemp.images (img) VALUES ($1) "+
+			"RETURNING id",
+		img).Scan(&id)
 	return
 }

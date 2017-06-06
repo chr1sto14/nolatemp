@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/chr1sto14/nolatemp/db"
 	"github.com/chr1sto14/nolatemp/hipchat"
 	"github.com/chr1sto14/nolatemp/net"
@@ -36,12 +35,19 @@ func cmdHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	net.Json(w, val)
-	return
 }
 
 func imgHandler(w http.ResponseWriter, r *http.Request) {
 	id := path.Base(r.URL.Path)
-	fmt.Fprintf(w, "img coming right up for %s!", id)
+
+	log.Printf("id: %v", id)
+	buf, err := db.QueryImg(id)
+	if err != nil {
+		net.Bad(w)
+		log.Printf("Error: %v", err)
+		return
+	}
+	net.Img(w, buf)
 }
 
 func nolaHandler(w http.ResponseWriter, r *http.Request) {
@@ -74,7 +80,7 @@ func nolaHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	log.SetFlags(log.Ldate | log.Ltime | log.LUTC) // only show UTC time
 	http.HandleFunc("/temp", cmdHandler)
-	http.HandleFunc("/img", imgHandler)
+	http.HandleFunc("/img/", imgHandler)
 	http.HandleFunc("/nola", nolaHandler)
 	http.ListenAndServe(":8888", nil)
 

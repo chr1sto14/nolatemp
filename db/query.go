@@ -14,7 +14,7 @@ type TempRow struct {
 
 func QueryTemp(minTs time.Time) (tss []time.Time, intemps []float64, outtemps []float64, err error) {
 	rows, err := Db.Query(
-		"SELECT ts, intemp, outtemp FROM  nolatemp.temp WHERE ts > $1",
+		"SELECT ts, intemp, outtemp FROM nolatemp.temp WHERE ts > $1",
 		minTs,
 	)
 	if err != nil {
@@ -34,5 +34,10 @@ func QueryTemp(minTs time.Time) (tss []time.Time, intemps []float64, outtemps []
 	if err = rows.Err(); err != nil {
 		return
 	}
+	return
+}
+
+func QueryImg(id string) (buf []byte, err error) {
+	err = Db.QueryRow("SELECT img FROM  nolatemp.images WHERE id = $1", id).Scan(&buf)
 	return
 }
