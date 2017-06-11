@@ -14,4 +14,4 @@
 .glide/
 
 *.swp
-config.json
+*.json
