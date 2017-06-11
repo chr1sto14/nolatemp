@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/chr1sto14/nolatemp/temp"
+	"github.com/chr1sto14/nolatemp/temprpi"
 	"log"
 	"os"
 	"time"

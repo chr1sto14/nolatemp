@@ -1,8 +1,7 @@
 package main
 
 import (
-	"flag"
-	"fmt"
+	"github.com/chr1sto14/nolatemp/config"
 	"github.com/chr1sto14/nolatemp/db"
 	"github.com/chr1sto14/nolatemp/hipchat"
 	"github.com/chr1sto14/nolatemp/net"
@@ -102,24 +101,17 @@ func main() {
 	defer f.Close()
 	log.SetOutput(f)
 
-	// get command line args
-	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: %s [OPTIONS] [URL]\n\n", os.Args[0])
-		fmt.Fprint(os.Stderr, "Options:\n")
-		flag.PrintDefaults()
+	// parse config
+	conf, err := config.GetConfig()
+	if err != nil {
+		log.Printf("Error: %v", err)
 	}
+	db.DbUrl = conf.DbUrl
+	hipchat.MyUrl = conf.MyUrl
+	temp.ApiKey = conf.Darkskyapi
 
-	url := flag.String("url", "", "url for own server")
-
-	if len(os.Args[1:]) == 0 {
-		flag.Usage()
-		os.Exit(0)
-	}
-	flag.Parse()
-	if *url == "" {
-		log.Printf("Error: url is required")
-	}
-	hipchat.MyUrl = *url
+	// connect to DB
+	db.OpenDb()
 
 	http.HandleFunc("/temp", cmdHandler)
 	http.HandleFunc("/img/", imgHandler)

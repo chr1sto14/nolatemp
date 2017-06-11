@@ -11,6 +11,7 @@ import (
 const absoluteZeroF = 459.67
 
 var nolaUrlRoot string = "https://api.darksky.net/forecast/%s/29.953,-90.071"
+var ApiKey string
 
 type DarkSkyApi struct {
 	Currently WeatherData `json:"currently"`
@@ -47,12 +48,7 @@ func getCurrentTemp(key string) (t float64, err error) {
 }
 
 func GetNolaTemp() (temp float64, err error) {
-	key, err := getApiKey()
-	if err != nil {
-		return
-	}
-
-	temp, err = getCurrentTemp(key)
+	temp, err = getCurrentTemp(ApiKey)
 	if err != nil {
 		return
 	}

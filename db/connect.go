@@ -1,26 +1,20 @@
 package db
 
 import (
-	"bytes"
 	"database/sql"
-	"io/ioutil"
 	"log"
-	"os/user"
 
 	_ "github.com/lib/pq"
 )
 
-var Db *sql.DB = openDb()
+var DbUrl string
+var Db *sql.DB
 
-func openDb() *sql.DB {
-	usr, _ := user.Current()
-
-	datab, _ := ioutil.ReadFile(usr.HomeDir + "/nolatemp.properties")
-	dbUrl := string(bytes.TrimSpace(datab))
-
-	db, err := sql.Open("postgres", dbUrl)
+func OpenDb() {
+	db, err := sql.Open("postgres", DbUrl)
 	if err != nil {
-		log.Fatal("error connecting to the database: ", err)
+		log.Printf("error connecting to the database: %v", err)
 	}
-	return db
+	Db = db
+	return
 }
