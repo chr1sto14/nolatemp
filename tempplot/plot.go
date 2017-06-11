@@ -10,6 +10,11 @@ import (
 	"time"
 )
 
+func nolaTimeTick(t float64) time.Time {
+	loc, _ := time.LoadLocation("America/Chicago")
+	return time.Unix(int64(t), 0).In(loc)
+}
+
 func makePoints(tss []time.Time, temps []float64) plotter.XYs {
 	pts := make(plotter.XYs, len(temps))
 	for i := range pts {
@@ -25,7 +30,7 @@ func MakePlot(tss []time.Time, intemps []float64, outtemps []float64) (img bytes
 		return
 	}
 
-	xticks := plot.TimeTicks{Format: "01-02\n15:04"}
+	xticks := plot.TimeTicks{Format: "01-02\n15:04", Time: nolaTimeTick}
 
 	p.Title.Text = "NOLA Temp"
 	p.X.Label.Text = "Time"
