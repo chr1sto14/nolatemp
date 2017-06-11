@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"github.com/chr1sto14/nolatemp/db"
 	"github.com/chr1sto14/nolatemp/hipchat"
 	"github.com/chr1sto14/nolatemp/net"
@@ -10,8 +12,6 @@ import (
 	"os"
 	"path"
 )
-
-var MyUrl = "http://localhost:8888"
 
 func cmdHandler(w http.ResponseWriter, r *http.Request) {
 	cmdJson, err := hipchat.ParseCmd(r.Body)
@@ -64,7 +64,6 @@ func nolaHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	// prepare ts, inTemp, outTemp
-	// TODO err
 	outTemp, err := temp.GetNolaTemp()
 	if err != nil {
 		net.Bad(w, err)
@@ -99,6 +98,25 @@ func main() {
 	if err != nil {
 		log.Printf("Error: %v", err)
 	}
+
+	// get command line args
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage: %s [OPTIONS] [URL]\n\n", os.Args[0])
+		fmt.Fprint(os.Stderr, "Options:\n")
+		flag.PrintDefaults()
+	}
+
+	url := flag.String("url", "", "url for own server")
+
+	if len(os.Args[1:]) == 0 {
+		flag.Usage()
+		os.Exit(0)
+	}
+	flag.Parse()
+	if *url == "" {
+		log.Printf("Error: url is required")
+	}
+	hipchat.MyUrl = *url
 
 	http.HandleFunc("/temp", cmdHandler)
 	http.HandleFunc("/img/", imgHandler)

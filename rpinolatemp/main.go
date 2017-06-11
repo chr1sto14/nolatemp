@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"github.com/chr1sto14/nolatemp/temp"
 	"log"
 	"os"
@@ -25,6 +27,24 @@ func main() {
 		log.Printf("Error: %v", err)
 	}
 
+	// get command line args
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage: %s [OPTIONS] [URL]\n\n", os.Args[0])
+		fmt.Fprint(os.Stderr, "Options:\n")
+		flag.PrintDefaults()
+	}
+	url := flag.String("url", "", "url for storing temperature")
+
+	if len(os.Args[1:]) == 0 {
+		flag.Usage()
+		os.Exit(0)
+	}
+	flag.Parse()
+
+	if *url == "" {
+		log.Printf("Error: url is required")
+	}
+
 	// check env variable for inittemp
 	err = temp.InitTemp()
 	if err != nil {
@@ -41,7 +61,7 @@ func main() {
 	// TODO temp.GetTemp()
 	tempVal := float64(100)
 
-	err = temp.SendTemp(now, tempVal)
+	err = temp.SendTemp(*url, now, tempVal)
 	if err != nil {
 		log.Printf("Error: %v", err)
 	}

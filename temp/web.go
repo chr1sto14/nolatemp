@@ -7,18 +7,14 @@ import (
 	"time"
 )
 
-// TODO make this a cmd line arg?
-var Tempurl string = "http://localhost:8888"
-var webnolaurl string = Tempurl + "/nola"
-
 type TempJson struct {
 	Ts   []byte  `json:"ts"`
 	Temp float64 `json:"temp"`
 }
 
-func SendTemp(ts []byte, temp float64) error {
+func SendTemp(url string, ts []byte, temp float64) error {
 	msg := TempJson{ts, temp}
-	return net.SendJson(webnolaurl, msg)
+	return net.SendJson(url+"/nola", msg)
 }
 
 func ParseTemp(body io.Reader) (ts time.Time, inTemp float64, err error) {
