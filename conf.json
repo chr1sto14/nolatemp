@@ -1,5 +1,0 @@
-{
-    "DbUrl": "postgresql://root@localhost:26257?sslcert=certs%2Fclient.root.crt&sslkey=certs%2Fclient.root.key&sslmode=verify-full&sslrootcert=certs%2Fca.crt",
-    "Darkskyapi": "245b8b566154eec226c8a04d12c3326d",
-    "Url": "http://localhost:8888"
-}
