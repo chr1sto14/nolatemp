@@ -1,5 +1,10 @@
 package hipchat
 
+import "fmt"
+
+var tempNowStr string = "<p><b>Time: </b>%s</p><p><b>Inside Temp: </b>%s&#8457</p><p><b>Outside Temp: </b>%s&#8457</p>"
+
+// TODO
 var tempUrl string = "http://localhost:8888"
 
 type Message struct {
@@ -24,6 +29,14 @@ func formatImgUrl(id string) string {
 func MsgImgUrl(id string) (m Message) {
 	m.Color = "gray"
 	m.Message = "<img src='" + formatImgUrl(id) + "'/>"
+	m.Message_format = "html"
+	m.Notify = false
+	return
+}
+
+func MsgTempNow(ts string, intemp string, outtemp string) (m Message) {
+	m.Color = "gray"
+	m.Message = fmt.Sprintf(tempNowStr, ts, intemp, outtemp)
 	m.Message_format = "html"
 	m.Notify = false
 	return

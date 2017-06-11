@@ -1,7 +1,7 @@
 CREATE DATABASE xxx;
 
 CREATE TABLE xxx.temp (
-    ts TIMESTAMP PRIMARY KEY,
+    ts TIMESTAMPTZ PRIMARY KEY,
     intemp DECIMAL,
     outtemp DECIMAL
 );

@@ -32,15 +32,17 @@ func ResolveCmd(cmd string) (timeType string, help bool, err error) {
 }
 
 func tempNow() (rv interface{}, err error) {
-	// 1. get latest reading from db
-	// 2. format into hipchat message
+	// get data from db
+	ts, intemp, outtemp, err := db.QueryTempNow()
+	if err != nil {
+		return
+	}
+
+	// format hipchat message
+	rv = hipchat.MsgTempNow(ts.Format(time.Kitchen), strconv.FormatFloat(intemp, 'f', -1, 64), strconv.FormatFloat(outtemp, 'f', -1, 64))
 	return
 }
 
-// 2. get latest readings from db based upon time
-// 3. form plot
-// 4. save plot in db
-// 5. return formatted hipchat with link to img in db
 func tempTime(t string) (rv interface{}, err error) {
 	loc, err := time.LoadLocation("America/Chicago")
 	now := time.Now().In(loc)
@@ -65,7 +67,7 @@ func tempTime(t string) (rv interface{}, err error) {
 	// TODO get data from db
 	cutoff := now.Add(time.Duration(-hour) * time.Hour)
 	log.Printf("time: %v", cutoff)
-	tss, intemps, outtemps, err := db.QueryTemp(cutoff)
+	tss, intemps, outtemps, err := db.QueryTemps(cutoff)
 	if err != nil {
 		return
 	}

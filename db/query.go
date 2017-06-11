@@ -12,7 +12,14 @@ type TempRow struct {
 	OutTemp float64   `json:"outtemp"`
 }
 
-func QueryTemp(minTs time.Time) (tss []time.Time, intemps []float64, outtemps []float64, err error) {
+func QueryTempNow() (ts time.Time, intemp float64, outtemp float64, err error) {
+	err = Db.QueryRow(
+		"SELECT ts, intemp, outtemp FROM nolatemp.temp ORDER BY ts LIMIT 1",
+	).Scan(&ts, &intemp, &outtemp)
+	return
+}
+
+func QueryTemps(minTs time.Time) (tss []time.Time, intemps []float64, outtemps []float64, err error) {
 	rows, err := Db.Query(
 		"SELECT ts, intemp, outtemp FROM nolatemp.temp WHERE ts > $1",
 		minTs,
