@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/chr1sto14/nolatemp/net"
 	"io/ioutil"
-	"log"
 	"os/user"
 )
 
@@ -22,28 +21,40 @@ type WeatherData struct {
 }
 
 func getApiKey() (string, error) {
-	// TODO err check here
-	usr, _ := user.Current()
+	// get user home dir
+	usr, err := user.Current()
+	if err != nil {
+		return "", err
+	}
 
-	// TODO err check here
-	datab, _ := ioutil.ReadFile(usr.HomeDir + "/weatherapi.key")
+	// grab api key
+	datab, err := ioutil.ReadFile(usr.HomeDir + "/weatherapi.key")
+	if err != nil {
+		return "", err
+	}
 
 	return string(bytes.TrimSpace(datab)), nil
 }
 
-func getCurrentTemp(key string) (float64, error) {
+func getCurrentTemp(key string) (t float64, err error) {
 	ds := new(DarkSkyApi)
-	err := net.GetJson(fmt.Sprintf(nolaUrlRoot, key), ds)
+	err = net.GetJson(fmt.Sprintf(nolaUrlRoot, key), ds)
 	if err != nil {
-		log.Printf("Error %s", err)
+		return
 	}
-	return ds.Currently.Temp, nil
+	t = ds.Currently.Temp
+	return
 }
 
-// TODO err check here
-func GetNolaTemp() float64 {
-	key, _ := getApiKey()
-	// TODO err check here
-	temp, _ := getCurrentTemp(key)
-	return temp
+func GetNolaTemp() (temp float64, err error) {
+	key, err := getApiKey()
+	if err != nil {
+		return
+	}
+
+	temp, err = getCurrentTemp(key)
+	if err != nil {
+		return
+	}
+	return
 }

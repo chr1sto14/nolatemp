@@ -6,8 +6,8 @@ import (
 	"strconv"
 )
 
-func Bad(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusBadRequest)
+func Bad(w http.ResponseWriter, err error) {
+	http.Error(w, err.Error(), http.StatusBadRequest)
 }
 
 func Good(w http.ResponseWriter) {

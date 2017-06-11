@@ -4,8 +4,7 @@ import "fmt"
 
 var tempNowStr string = "<p><b>Time: </b>%s</p><p><b>Inside Temp: </b>%s&#8457</p><p><b>Outside Temp: </b>%s&#8457</p>"
 
-// TODO
-var tempUrl string = "http://localhost:8888"
+var MyUrl string
 
 type Message struct {
 	Color          string `json:"color"`
@@ -23,7 +22,7 @@ func Help() (m Message) {
 }
 
 func formatImgUrl(id string) string {
-	return tempUrl + "/img/" + id
+	return MyUrl + "/img/" + id
 }
 
 func MsgImgUrl(id string) (m Message) {

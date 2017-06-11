@@ -6,13 +6,16 @@ import (
 	"net/http"
 )
 
-func SendJson(url string, pkg interface{}) error {
-	// TODO json Encoder
-	buf, _ := json.Marshal(pkg)
+func SendJson(url string, pkg interface{}) (err error) {
+	buf, err := json.Marshal(pkg)
+	if err != nil {
+		return
+	}
+
 	r, err := http.Post(url, "application/json", bytes.NewReader(buf))
 	if err != nil {
-		return err
+		return
 	}
 	defer r.Body.Close()
-	return nil
+	return
 }

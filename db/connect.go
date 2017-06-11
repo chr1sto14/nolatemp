@@ -13,10 +13,8 @@ import (
 var Db *sql.DB = openDb()
 
 func openDb() *sql.DB {
-	// TODO err check here
 	usr, _ := user.Current()
 
-	// TODO err check here
 	datab, _ := ioutil.ReadFile(usr.HomeDir + "/nolatemp.properties")
 	dbUrl := string(bytes.TrimSpace(datab))
 

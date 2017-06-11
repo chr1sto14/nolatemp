@@ -2,6 +2,7 @@ package temp
 
 import (
 	"io/ioutil"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
@@ -10,6 +11,7 @@ import (
 
 var deviceFile string = "1000"
 
+// TODO
 // getFile()
 
 func getFile() string {
@@ -21,28 +23,36 @@ func getFile() string {
 	return devicesFolder[0] + "/w1_slave"
 }
 
-func InitTemp() error {
-	_, err := exec.Command("modprobe w1-gpio").Output()
-	if err != nil {
-		return err
-	}
+func InitTemp() (err error) {
+	if _, ok := os.LookupEnv("NOLATEMP"); ok {
+		return
+	} else {
+		_, err = exec.Command("modprobe w1-gpio").Output()
+		if err != nil {
+			return
+		}
 
-	_, err = exec.Command("modprobe w1-therm").Output()
-	if err != nil {
-		return err
+		_, err = exec.Command("modprobe w1-therm").Output()
+		if err != nil {
+			return
+		}
+		os.Setenv("NOLATEMP", "true")
 	}
-	return nil
+	return
 }
 
-func GetTemp() float64 {
-	// TODO err check here
-	data, _ := ioutil.ReadFile(deviceFile)
+func GetTemp() (tempFloat float64, err error) {
+	data, err := ioutil.ReadFile(deviceFile)
+	if err != nil {
+		return
+	}
 
-	datastr := string(data)
-
-	bottomLine := strings.Split(datastr, "\n")[1]
+	bottomLine := strings.Split(string(data), "\n")[1]
 	tempStr := strings.Split(bottomLine, " ")[9]
-	// TODO err check here
-	tempFloat, _ := strconv.ParseFloat(tempStr, 64)
-	return tempFloat / 1000
+	tempFloat, err = strconv.ParseFloat(tempStr, 64)
+	if err != nil {
+		return
+	}
+	tempFloat /= 1000
+	return
 }

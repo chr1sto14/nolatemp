@@ -7,20 +7,23 @@ import (
 	"github.com/chr1sto14/nolatemp/temp"
 	"log"
 	"net/http"
+	"os"
 	"path"
 )
+
+var MyUrl = "http://localhost:8888"
 
 func cmdHandler(w http.ResponseWriter, r *http.Request) {
 	cmdJson, err := hipchat.ParseCmd(r.Body)
 	if err != nil {
-		net.Bad(w) // TODO following example http wiki example
+		net.Bad(w, err)
 		log.Printf("Error: %v", err)
 		return
 	}
 
 	timeType, help, err := temp.ResolveCmd(cmdJson.Item.Message)
 	if err != nil {
-		net.Bad(w)
+		net.Bad(w, err)
 		log.Printf("Error: %v", err)
 		return
 	} else if help {
@@ -30,7 +33,7 @@ func cmdHandler(w http.ResponseWriter, r *http.Request) {
 
 	val, err := temp.DoCmd(timeType)
 	if err != nil {
-		net.Bad(w)
+		net.Bad(w, err)
 		log.Printf("Error: %v", err)
 		return
 	}
@@ -43,7 +46,7 @@ func imgHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("id: %v", id)
 	buf, err := db.QueryImg(id)
 	if err != nil {
-		net.Bad(w)
+		net.Bad(w, err)
 		log.Printf("Error: %v", err)
 		return
 	}
@@ -54,7 +57,7 @@ func nolaHandler(w http.ResponseWriter, r *http.Request) {
 	// parse and return ts and inTemp
 	ts, inTemp, err := temp.ParseTemp(r.Body)
 	if err != nil {
-		net.Bad(w)
+		net.Bad(w, err)
 		log.Printf("Error: %v", err)
 		return
 	}
@@ -62,34 +65,43 @@ func nolaHandler(w http.ResponseWriter, r *http.Request) {
 
 	// prepare ts, inTemp, outTemp
 	// TODO err
-	outTemp := temp.GetNolaTemp()
-	log.Printf("The ts %v", ts)
-	log.Printf("The inTemp %v", inTemp)
-	log.Printf("The outTemp %v", outTemp)
+	outTemp, err := temp.GetNolaTemp()
+	if err != nil {
+		net.Bad(w, err)
+		log.Printf("Error: %v", err)
+		return
+	}
 
 	// cockroach db
 	err = db.InsertTsInOut(ts, inTemp, outTemp)
 	if err != nil {
-		net.Bad(w)
+		net.Bad(w, err)
 		log.Printf("Error: %v", err)
 		return
 	}
 	net.Good(w)
 }
 
-func main() {
+func logSetup() (err error) {
 	log.SetFlags(log.Ldate | log.Ltime | log.LUTC) // only show UTC time
+	f, err := os.OpenFile("nolatemp.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	log.SetOutput(f)
+	return
+}
+
+func main() {
+	err := logSetup()
+	if err != nil {
+		log.Printf("Error: %v", err)
+	}
+
 	http.HandleFunc("/temp", cmdHandler)
 	http.HandleFunc("/img/", imgHandler)
 	http.HandleFunc("/nola", nolaHandler)
 	http.ListenAndServe(":8888", nil)
-
-	// TODO
-	// 1. receive cmds from hipchat
-	// 2. get relevant data from db
-	// 3. store image to db
-	// 4. recieve commands from hipchat
-	// 5. gather data from db based upon timeline
-	// 6. format a plot ( inside, outside vs. time )
-	// 7. format response to nola hipchat
 }
