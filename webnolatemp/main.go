@@ -94,10 +94,13 @@ func logSetup() (err error) {
 }
 
 func main() {
-	err := logSetup()
+	log.SetFlags(log.Ldate | log.Ltime | log.LUTC) // only show UTC time
+	f, err := os.OpenFile("nolatemp.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Printf("Error: %v", err)
 	}
+	defer f.Close()
+	log.SetOutput(f)
 
 	// get command line args
 	flag.Usage = func() {

@@ -9,10 +9,7 @@ import (
 	"strings"
 )
 
-var deviceFile string = "1000"
-
-// TODO
-// getFile()
+var deviceFile string = getFile()
 
 func getFile() string {
 	baseDir := "/sys/bus/w1/devices/"
@@ -27,12 +24,12 @@ func InitTemp() (err error) {
 	if _, ok := os.LookupEnv("NOLATEMP"); ok {
 		return
 	} else {
-		_, err = exec.Command("modprobe w1-gpio").Output()
+		_, err = exec.Command("/sbin/modprobe w1-gpio").Output()
 		if err != nil {
 			return
 		}
 
-		_, err = exec.Command("modprobe w1-therm").Output()
+		_, err = exec.Command("/sbin/modprobe w1-therm").Output()
 		if err != nil {
 			return
 		}
@@ -49,7 +46,7 @@ func GetTemp() (tempFloat float64, err error) {
 
 	bottomLine := strings.Split(string(data), "\n")[1]
 	tempStr := strings.Split(bottomLine, " ")[9]
-	tempFloat, err = strconv.ParseFloat(tempStr, 64)
+	tempFloat, err = strconv.ParseFloat(tempStr[2:], 64)
 	if err != nil {
 		return
 	}

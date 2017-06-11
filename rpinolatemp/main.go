@@ -9,23 +9,14 @@ import (
 	"time"
 )
 
-func logSetup() (err error) {
+func main() {
 	log.SetFlags(log.Ldate | log.Ltime | log.LUTC) // only show UTC time
 	f, err := os.OpenFile("nolatemp.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	log.SetOutput(f)
-	return
-}
-
-func main() {
-	err := logSetup()
-	if err != nil {
 		log.Printf("Error: %v", err)
 	}
+	defer f.Close()
+	log.SetOutput(f)
 
 	// get command line args
 	flag.Usage = func() {
@@ -58,8 +49,10 @@ func main() {
 	}
 
 	// read temperature from rpi
-	// TODO temp.GetTemp()
-	tempVal := float64(100)
+	tempVal, err := temp.GetTemp()
+	if err != nil {
+		log.Printf("Error: %v", err)
+	}
 
 	err = temp.SendTemp(*url, now, tempVal)
 	if err != nil {
