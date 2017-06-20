@@ -38,8 +38,13 @@ func tempNow() (rv interface{}, err error) {
 		return
 	}
 
+	loc, err := time.LoadLocation("America/Chicago")
+	if err != nil {
+		return
+	}
+
 	// format hipchat message
-	rv = hipchat.MsgTempNow(ts.Format(time.Kitchen), strconv.FormatFloat(intemp, 'f', -1, 64), strconv.FormatFloat(outtemp, 'f', -1, 64))
+	rv = hipchat.MsgTempNow(ts.In(loc).Format(time.Kitchen), strconv.FormatFloat(intemp, 'f', -1, 64), strconv.FormatFloat(outtemp, 'f', -1, 64))
 	return
 }
 

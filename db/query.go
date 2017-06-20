@@ -14,7 +14,7 @@ type TempRow struct {
 
 func QueryTempNow() (ts time.Time, intemp float64, outtemp float64, err error) {
 	err = Db.QueryRow(
-		"SELECT ts, intemp, outtemp FROM nolaschema.temp ORDER BY ts LIMIT 1",
+		"SELECT ts, intemp, outtemp FROM nolaschema.temp ORDER BY ts DESC LIMIT 1",
 	).Scan(&ts, &intemp, &outtemp)
 	return
 }
