@@ -1,10 +1,13 @@
 package hipchat
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 var tempNowStr string = "<p><b>Time: </b>%s</p><p><b>Inside Temp: </b>%s&#8457</p><p><b>Outside Temp: </b>%s&#8457</p>"
 
-var MyUrl string
+var MyUrl string = os.Getenv("MYURL")
 
 type Message struct {
 	Color          string `json:"color"`

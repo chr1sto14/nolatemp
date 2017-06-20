@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/chr1sto14/nolatemp/config"
 	"github.com/chr1sto14/nolatemp/db"
 	"github.com/chr1sto14/nolatemp/hipchat"
 	"github.com/chr1sto14/nolatemp/net"
@@ -12,72 +11,82 @@ import (
 	"path"
 )
 
+const indexPage = "public/index.html"
+const favIcon = "public/favicon.ico"
+
 func cmdHandler(w http.ResponseWriter, r *http.Request) {
-	cmdJson, err := hipchat.ParseCmd(r.Body)
-	if err != nil {
-		net.Bad(w, err)
-		log.Printf("Error: %v", err)
-		return
-	}
+	if r.Method == "POST" {
+		log.Printf("Body: %v", r.Body)
+		cmdJson, err := hipchat.ParseCmd(r.Body)
+		if err != nil {
+			net.Bad(w, err)
+			log.Printf("Error: %v", err)
+			return
+		}
 
-	timeType, help, err := temp.ResolveCmd(cmdJson.Item.Message)
-	if err != nil {
-		net.Bad(w, err)
-		log.Printf("Error: %v", err)
-		return
-	} else if help {
-		net.Json(w, hipchat.Help())
-		return
-	}
+		timeType, help, err := temp.ResolveCmd(cmdJson.Item.Message.Message)
+		if err != nil {
+			net.Bad(w, err)
+			log.Printf("Error: %v", err)
+			return
+		} else if help {
+			net.Json(w, hipchat.Help())
+			return
+		}
 
-	val, err := temp.DoCmd(timeType)
-	if err != nil {
-		net.Bad(w, err)
-		log.Printf("Error: %v", err)
-		return
+		val, err := temp.DoCmd(timeType)
+		if err != nil {
+			net.Bad(w, err)
+			log.Printf("Error: %v", err)
+			return
+		}
+		net.Json(w, val)
 	}
-	net.Json(w, val)
 }
 
 func imgHandler(w http.ResponseWriter, r *http.Request) {
-	id := path.Base(r.URL.Path)
+	if r.Method == "GET" {
+		id := path.Base(r.URL.Path)
 
-	log.Printf("id: %v", id)
-	buf, err := db.QueryImg(id)
-	if err != nil {
-		net.Bad(w, err)
-		log.Printf("Error: %v", err)
-		return
+		log.Printf("id: %v", id)
+		buf, err := db.QueryImg(id)
+		if err != nil {
+			net.Bad(w, err)
+			log.Printf("Error: %v", err)
+			return
+		}
+		net.Img(w, buf)
 	}
-	net.Img(w, buf)
 }
 
 func nolaHandler(w http.ResponseWriter, r *http.Request) {
-	// parse and return ts and inTemp
-	ts, inTemp, err := temp.ParseTemp(r.Body)
-	if err != nil {
-		net.Bad(w, err)
-		log.Printf("Error: %v", err)
-		return
-	}
-	defer r.Body.Close()
+	if r.Method == "POST" {
+		// parse and return ts and inTemp
+		ts, inTemp, err := temp.ParseTemp(r.Body)
+		if err != nil {
+			net.Bad(w, err)
+			log.Printf("Error: %v", err)
+			return
+		}
+		defer r.Body.Close()
 
-	// prepare ts, inTemp, outTemp
-	outTemp, err := temp.GetNolaTemp()
-	if err != nil {
-		net.Bad(w, err)
-		log.Printf("Error: %v", err)
-		return
-	}
+		// prepare ts, inTemp, outTemp
+		outTemp, err := temp.GetNolaTemp()
+		if err != nil {
+			net.Bad(w, err)
+			log.Printf("Error: %v", err)
+			return
+		}
 
-	// cockroach db
-	err = db.InsertTsInOut(ts, inTemp, outTemp)
-	if err != nil {
-		net.Bad(w, err)
-		log.Printf("Error: %v", err)
-		return
+		// cockroach db
+		err = db.InsertTsInOut(ts, inTemp, outTemp)
+		if err != nil {
+			net.Bad(w, err)
+			log.Printf("Error: %v", err)
+			return
+		}
+		net.Good(w)
 	}
-	net.Good(w)
 }
 
 func logSetup() (err error) {
@@ -92,29 +101,37 @@ func logSetup() (err error) {
 	return
 }
 
+func root(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		http.ServeFile(w, r, indexPage)
+	}
+}
+
+func favicon(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		http.ServeFile(w, r, favIcon)
+	}
+}
+
 func main() {
 	log.SetFlags(log.Ldate | log.Ltime | log.LUTC) // only show UTC time
-	f, err := os.OpenFile("nolatemp.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	f, err := os.OpenFile("/var/app/current/nolatemp.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Printf("Error: %v", err)
 	}
 	defer f.Close()
 	log.SetOutput(f)
 
-	// parse config
-	conf, err := config.GetConfig()
-	if err != nil {
-		log.Printf("Error: %v", err)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "5000"
 	}
-	db.DbUrl = conf.DbUrl
-	hipchat.MyUrl = conf.MyUrl
-	temp.ApiKey = conf.Darkskyapi
 
-	// connect to DB
-	db.OpenDb()
-
+	http.HandleFunc("/", root)
 	http.HandleFunc("/temp", cmdHandler)
 	http.HandleFunc("/img/", imgHandler)
 	http.HandleFunc("/nola", nolaHandler)
-	http.ListenAndServe(":8888", nil)
+	http.HandleFunc("/favicon.ico", favicon)
+	log.Printf("Listening on port %s\n\n", port)
+	http.ListenAndServe(":"+port, nil)
 }

@@ -38,7 +38,7 @@ func main() {
 	}
 
 	// check env variable for inittemp
-	err = temp.InitTemp()
+	err = temprpi.InitTemp()
 	if err != nil {
 		log.Printf("Error: %v", err)
 	}
@@ -50,7 +50,7 @@ func main() {
 	}
 
 	// read temperature from rpi
-	tempVal, err := temp.GetTemp()
+	tempVal, err := temprpi.GetTemp()
 	if err != nil {
 		log.Printf("Error: %v", err)
 	}

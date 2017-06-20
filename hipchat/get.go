@@ -5,12 +5,16 @@ import (
 	"io"
 )
 
-type Msg struct {
+type Msg2 struct {
 	Message string `json:"message"`
 }
 
+type Msg1 struct {
+	Message Msg2 `json:"message"`
+}
+
 type CmdJson struct {
-	Item Msg `json:"item"`
+	Item Msg1 `json:"item"`
 }
 
 func ParseCmd(body io.Reader) (cmdJson CmdJson, err error) {

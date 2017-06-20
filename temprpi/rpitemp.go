@@ -1,4 +1,4 @@
-package temp
+package temprpi
 
 import (
 	"io/ioutil"
@@ -51,5 +51,7 @@ func GetTemp() (tempFloat float64, err error) {
 		return
 	}
 	tempFloat /= 1000
+	tempFloat *= 1.8
+	tempFloat += 32
 	return
 }

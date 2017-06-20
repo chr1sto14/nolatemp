@@ -1,4 +1,4 @@
-CREATE DATABASE xxx;
+CREATE SCHEMA xxx;
 
 CREATE TABLE xxx.temp (
     ts TIMESTAMPTZ PRIMARY KEY,
@@ -8,5 +8,5 @@ CREATE TABLE xxx.temp (
 
 CREATE TABLE xxx.images (
     id SERIAL PRIMARY KEY,
-    img BYTES
+    img BYTEA
 );

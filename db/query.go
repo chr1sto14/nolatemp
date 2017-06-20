@@ -14,14 +14,14 @@ type TempRow struct {
 
 func QueryTempNow() (ts time.Time, intemp float64, outtemp float64, err error) {
 	err = Db.QueryRow(
-		"SELECT ts, intemp, outtemp FROM nolatemp.temp ORDER BY ts LIMIT 1",
+		"SELECT ts, intemp, outtemp FROM nolaschema.temp ORDER BY ts LIMIT 1",
 	).Scan(&ts, &intemp, &outtemp)
 	return
 }
 
 func QueryTemps(minTs time.Time) (tss []time.Time, intemps []float64, outtemps []float64, err error) {
 	rows, err := Db.Query(
-		"SELECT ts, intemp, outtemp FROM nolatemp.temp WHERE ts > $1",
+		"SELECT ts, intemp, outtemp FROM nolaschema.temp WHERE ts > $1",
 		minTs,
 	)
 	if err != nil {
@@ -45,6 +45,6 @@ func QueryTemps(minTs time.Time) (tss []time.Time, intemps []float64, outtemps [
 }
 
 func QueryImg(id string) (buf []byte, err error) {
-	err = Db.QueryRow("SELECT img FROM  nolatemp.images WHERE id = $1", id).Scan(&buf)
+	err = Db.QueryRow("SELECT img FROM nolaschema.images WHERE id = $1", id).Scan(&buf)
 	return
 }

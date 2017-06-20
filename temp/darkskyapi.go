@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"github.com/chr1sto14/nolatemp/net"
 	"io/ioutil"
+	"os"
 	"os/user"
 )
 
 const absoluteZeroF = 459.67
 
 var nolaUrlRoot string = "https://api.darksky.net/forecast/%s/29.953,-90.071"
-var ApiKey string
+var ApiKey string = os.Getenv("DARK_SKY_API_KEY")
 
 type DarkSkyApi struct {
 	Currently WeatherData `json:"currently"`
